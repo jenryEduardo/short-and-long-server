@@ -16,7 +16,7 @@ func GetPersons(c *gin.Context){
 	persona,err:=useCase.Execute();
 
 	if err!=nil{
-		c.JSON(http.StatusBadRequest,gin.H{"error":"no se pudo obtener todos los usuarios"})
+		c.JSON(http.StatusBadRequest,err)
 		return
 	}
 

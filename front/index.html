@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Personas Registradas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .counters {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-bottom: 20px;
+    }
+
+    .counter {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #000;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    .form-container {
+      margin-top: 30px;
+      border: 1px solid #ccc;
+      padding: 20px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      padding: 10px 15px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .center {
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Personas Registradas</h1>
+
+  <div class="counters">
+    <div class="counter">👨 Total Hombres: <span id="totalHombres">Cargando...</span></div>
+    <div class="counter">👩 Total Mujeres: <span id="totalMujeres">Cargando...</span></div>
+  </div>
+
+  <div class="center">
+    <button onclick="cargarDatos()">🔄 Refrescar Datos</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Edad</th>
+        <th>Sexo</th>
+      </tr>
+    </thead>
+    <tbody id="tablaPersonas">
+      <!-- Datos aquí -->
+    </tbody>
+  </table>
+
+  <div class="form-container">
+    <h3>Registrar Nueva Persona</h3>
+    <form id="formPersona">
+      <label>Nombre:</label>
+      <input type="text" id="nombre" required />
+
+      <label>Edad:</label>
+      <input type="number" id="edad" min="1" required />
+
+      <label>Sexo:</label>
+      <select id="sexo" required>
+        <option value="">-- Selecciona --</option>
+        <option value="H">Hombre</option>
+        <option value="M">Mujer</option>
+      </select>
+
+      <button type="submit">➕ Agregar Persona</button>
+    </form>
+  </div>
+
+  <script>
+    async function cargarDatos() {
+      try {
+        // Cargar personas
+        const resPersonas = await fetch('http://localhost:8080/personas/OJITO');
+        const personas = await resPersonas.json();
+
+        const tabla = document.getElementById('tablaPersonas');
+        tabla.innerHTML = '';
+        personas.forEach(p => {
+          const fila = `
+            <tr>
+              <td>${p.Nombre}</td>
+              <td>${p.Edad}</td>
+              <td>${p.Sexo}</td>
+            </tr>
+          `;
+          tabla.innerHTML += fila;
+        });
+
+        // Totales
+        const resH = await fetch('http://localhost:8080/personas/totalH');
+        const totalH = await resH.json();
+        document.getElementById('totalHombres').textContent = totalH;
+
+        const resM = await fetch('http://localhost:8080/personas/totalM');
+        const totalM = await resM.json();
+        document.getElementById('totalMujeres').textContent = totalM;
+
+      } catch (error) {
+        console.error('Error cargando datos:', error);
+      }
+    }
+
+    // Formulario de nueva persona
+    document.getElementById('formPersona').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const nombre = document.getElementById('nombre').value;
+      const edad = parseInt(document.getElementById('edad').value);
+      const sexo = document.getElementById('sexo').value;
+
+      const nuevaPersona = { Nombre: nombre, Edad: edad, Sexo: sexo };
+
+      try {
+        const res = await fetch('http://localhost:8080/personas/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(nuevaPersona)
+        });
+
+        if (res.ok) {
+          alert('Persona registrada con éxito!');
+          document.getElementById('formPersona').reset();
+          cargarDatos();
+        } else {
+          alert('Error al registrar persona.');
+        }
+
+      } catch (error) {
+        console.error('Error al enviar datos:', error);
+      }
+    });
+
+    window.onload = cargarDatos;
+  </script>
+
+</body>
+</html>

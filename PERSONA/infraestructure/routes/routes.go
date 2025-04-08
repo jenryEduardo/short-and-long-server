@@ -13,7 +13,7 @@ func SetupRoutes(router *gin.Engine) {
 	product := router.Group("/personas")
 	// Rutas para productos
 	product.POST("/", controllers.SavePerson)
-	product.GET("/", controllers.GetPersons)
+	product.GET("/OJITO", controllers.GetPersons)
 	product.GET("/totalH",controllers.GetPersonsH)
 	product.GET("/totalM",controllers.GetPersonsM)
 }
